@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 
@@ -161,6 +161,8 @@ const Icons = {
   ),
 }
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 type OrderStatus =
   | 'pending'
   | 'confirmed'
@@ -208,6 +210,8 @@ interface AbandonedCheckout {
   recoveryEmailSent: boolean
   stage: 'cart' | 'shipping' | 'payment'
 }
+
+// ── Data ──────────────────────────────────────────────────────────────────────
 
 const ORDERS: Order[] = [
   {
@@ -489,6 +493,8 @@ const ABANDONED_CHECKOUTS: AbandonedCheckout[] = [
   },
 ]
 
+// ── Styles / constants ────────────────────────────────────────────────────────
+
 const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
   pending: 'bg-[#FFC453]/20 text-[#916A00]',
   confirmed: 'bg-[#2C6ECB]/10 text-[#2C6ECB]',
@@ -529,7 +535,9 @@ const ALL_STATUSES = [
   'Refunded',
 ]
 
-function formatCurrency(n: number) {
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function formatCurrency(n: number): string {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
@@ -537,11 +545,20 @@ function formatCurrency(n: number) {
   }).format(n)
 }
 
-export default function OrdersPage() {
+function statusDot(status: OrderStatus): string {
+  if (status === 'delivered') return 'bg-[#008060]'
+  if (status === 'shipped') return 'bg-purple-500'
+  if (status === 'processing' || status === 'confirmed') return 'bg-[#2C6ECB]'
+  if (status === 'pending') return 'bg-[#FFC453]'
+  return 'bg-[#D82C0D]'
+}
+
+// ── Main content (uses useSearchParams — must be inside Suspense) ──────────────
+
+function OrdersPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const statusParam = searchParams.get('status')
-
   const view =
     statusParam === 'draft'
       ? 'draft'
@@ -556,7 +573,7 @@ export default function OrdersPage() {
   const [dateRange, setDateRange] = useState('last30')
   const pageSize = 8
 
-  const setTab = (tab: string) => {
+  function setTab(tab: string) {
     setSearch('')
     setSelectedIds([])
     setPage(1)
@@ -564,7 +581,6 @@ export default function OrdersPage() {
     else router.push(`/dashboard/orders?status=${tab}`)
   }
 
-  // Filter orders
   const filteredOrders = ORDERS.filter((o) => {
     const matchSearch =
       o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
@@ -700,14 +716,14 @@ export default function OrdersPage() {
       {/* Main card */}
       <div className='bg-white border border-[#E1E3E5] rounded-xl overflow-hidden'>
         {/* Tabs */}
-        <div className='flex items-center border-b border-[#E1E3E5] px-4 overflow-x-auto scrollbar-none'>
+        <div className='flex items-center border-b border-[#E1E3E5] px-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setTab(tab.id)}
               className={`px-4 py-3 text-[13px] font-medium whitespace-nowrap border-b-2 transition-all bg-transparent border-l-0 border-r-0 border-t-0 cursor-pointer ${view === tab.id ? 'border-b-[#008060] text-[#008060]' : 'border-b-transparent text-[#6D7175] hover:text-[#202223]'}`}
             >
-              {tab.label}
+              {tab.label}{' '}
               <span className='ml-1.5 text-[10.5px] text-[#8C9196]'>
                 {tab.count}
               </span>
@@ -718,8 +734,9 @@ export default function OrdersPage() {
         {/* ── All Orders ── */}
         {view === 'all' && (
           <>
+            {/* Search + filter */}
             <div className='flex items-center gap-3 px-4 py-3 border-b border-[#E1E3E5] flex-wrap'>
-              <div className='flex items-center gap-2 flex-1 min-w-50 px-3 py-2 border border-[#E1E3E5] rounded-lg bg-[#F6F6F7] focus-within:border-[#008060] focus-within:bg-white transition-all'>
+              <div className='flex items-center gap-2 flex-1 min-w-[200px] px-3 py-2 border border-[#E1E3E5] rounded-lg bg-[#F6F6F7] focus-within:border-[#008060] focus-within:bg-white transition-all'>
                 {Icons.search}
                 <input
                   type='text'
@@ -754,8 +771,8 @@ export default function OrdersPage() {
               </select>
             </div>
 
-            {/* Status tabs */}
-            <div className='flex items-center border-b border-[#E1E3E5] overflow-x-auto scrollbar-none px-4'>
+            {/* Status sub-tabs */}
+            <div className='flex items-center border-b border-[#E1E3E5] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4'>
               {ALL_STATUSES.map((s) => (
                 <button
                   key={s}
@@ -778,7 +795,7 @@ export default function OrdersPage() {
 
             {/* Bulk actions */}
             {selectedIds.length > 0 && (
-              <div className='flex items-center gap-3 px-4 py-2.5 bg-[#008060]/8 border-b border-[#008060]/20'>
+              <div className='flex items-center gap-3 px-4 py-2.5 bg-[#008060]/[0.08] border-b border-[#008060]/20'>
                 <span className='text-[13px] font-medium text-[#008060]'>
                   {selectedIds.length} selected
                 </span>
@@ -806,6 +823,7 @@ export default function OrdersPage() {
               </div>
             )}
 
+            {/* Table */}
             <div className='overflow-x-auto'>
               <table className='w-full'>
                 <thead>
@@ -821,30 +839,23 @@ export default function OrdersPage() {
                         className='w-4 h-4 rounded accent-[#008060] cursor-pointer'
                       />
                     </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Order
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Customer
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Date
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Amount
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Status
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Payment
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Source
-                    </th>
-                    <th className='px-4 py-3 text-right text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Actions
-                    </th>
+                    {[
+                      'Order',
+                      'Customer',
+                      'Date',
+                      'Amount',
+                      'Status',
+                      'Payment',
+                      'Source',
+                      'Actions',
+                    ].map((h, i) => (
+                      <th
+                        key={h}
+                        className={`px-4 py-3 text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide ${i === 7 ? 'text-right' : 'text-left'}`}
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-[#F1F1F1]'>
@@ -914,7 +925,7 @@ export default function OrdersPage() {
                             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold capitalize ${ORDER_STATUS_STYLES[order.status]}`}
                           >
                             <span
-                              className={`w-1.5 h-1.5 rounded-full ${order.status === 'delivered' ? 'bg-[#008060]' : order.status === 'shipped' ? 'bg-purple-500' : order.status === 'processing' || order.status === 'confirmed' ? 'bg-[#2C6ECB]' : order.status === 'pending' ? 'bg-[#FFC453]' : 'bg-[#D82C0D]'}`}
+                              className={`w-1.5 h-1.5 rounded-full ${statusDot(order.status)}`}
                             />
                             {order.status}
                           </span>
@@ -964,6 +975,7 @@ export default function OrdersPage() {
               </table>
             </div>
 
+            {/* Pagination */}
             <div className='flex items-center justify-between px-4 py-3 border-t border-[#E1E3E5]'>
               <p className='text-[12.5px] text-[#6D7175]'>
                 Showing{' '}
@@ -984,7 +996,7 @@ export default function OrdersPage() {
                 >
                   ← Prev
                 </button>
-                {[...Array(totalPages)].map((_, i) => (
+                {Array.from({ length: totalPages }).map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setPage(i + 1)}
@@ -1010,36 +1022,30 @@ export default function OrdersPage() {
           <div>
             <div className='px-5 py-4 border-b border-[#E1E3E5] bg-[#FFC453]/5'>
               <p className='text-[13px] text-[#916A00] flex items-center gap-2'>
-                <span>{Icons.clock}</span>
-                Draft orders are saved but not yet confirmed. Complete or delete
-                them.
+                <span>{Icons.clock}</span>Draft orders are saved but not yet
+                confirmed. Complete or delete them.
               </p>
             </div>
             <div className='overflow-x-auto'>
               <table className='w-full'>
                 <thead>
                   <tr className='border-b border-[#E1E3E5] bg-[#F6F6F7]/50'>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Draft ID
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Customer
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Date
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Items
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Amount
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Note
-                    </th>
-                    <th className='px-4 py-3 text-right text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Actions
-                    </th>
+                    {[
+                      'Draft ID',
+                      'Customer',
+                      'Date',
+                      'Items',
+                      'Amount',
+                      'Note',
+                      'Actions',
+                    ].map((h, i) => (
+                      <th
+                        key={h}
+                        className={`px-4 py-3 text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide ${i === 6 ? 'text-right' : 'text-left'}`}
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-[#F1F1F1]'>
@@ -1082,7 +1088,7 @@ export default function OrdersPage() {
                         </span>
                       </td>
                       <td className='px-4 py-3'>
-                        <p className='text-[12px] text-[#6D7175] max-w-45 truncate'>
+                        <p className='text-[12px] text-[#6D7175] max-w-[180px] truncate'>
                           {draft.note}
                         </p>
                       </td>
@@ -1169,27 +1175,22 @@ export default function OrdersPage() {
               <table className='w-full'>
                 <thead>
                   <tr className='border-b border-[#E1E3E5] bg-[#F6F6F7]/50'>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Customer
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Abandoned
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Stage
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Items
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Value
-                    </th>
-                    <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Recovery Email
-                    </th>
-                    <th className='px-4 py-3 text-right text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                      Actions
-                    </th>
+                    {[
+                      'Customer',
+                      'Abandoned',
+                      'Stage',
+                      'Items',
+                      'Value',
+                      'Recovery Email',
+                      'Actions',
+                    ].map((h, i) => (
+                      <th
+                        key={h}
+                        className={`px-4 py-3 text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide ${i === 6 ? 'text-right' : 'text-left'}`}
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-[#F1F1F1]'>
@@ -1291,5 +1292,31 @@ export default function OrdersPage() {
         )}
       </div>
     </div>
+  )
+}
+
+// ── Fallback ──────────────────────────────────────────────────────────────────
+
+function OrdersPageFallback() {
+  return (
+    <div className='space-y-5 animate-pulse'>
+      <div className='h-8 w-40 bg-[#E1E3E5] rounded-lg' />
+      <div className='grid grid-cols-2 xl:grid-cols-4 gap-4'>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className='h-24 bg-[#E1E3E5] rounded-xl' />
+        ))}
+      </div>
+      <div className='h-[500px] bg-[#E1E3E5] rounded-xl' />
+    </div>
+  )
+}
+
+// ── Default export — Suspense wrapper ─────────────────────────────────────────
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={<OrdersPageFallback />}>
+      <OrdersPageContent />
+    </Suspense>
   )
 }

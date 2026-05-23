@@ -1,8 +1,8 @@
-import { CURRENCY_SYMBOL, GST_RATE } from '@/lib/constants'
-import { POSItem } from '@/store/posStore'
+import { CURRENCY_SYMBOL } from '@/lib/constants'
+import type { CartDisplayItem } from '@/app/pos/terminal/page'
 
 interface Props {
-  items: POSItem[]
+  items: CartDisplayItem[]
   discount: number
   discountAmount: number
   gst: number
@@ -44,7 +44,6 @@ export default function BillingCart({
         style={{ borderBottom: '1px solid #E1E3E5' }}
       >
         <div className='flex items-center gap-2'>
-          {/* Cart SVG */}
           <svg
             width='16'
             height='16'
@@ -72,14 +71,12 @@ export default function BillingCart({
           )}
         </div>
 
-        {/* Clear button */}
         {items.length > 0 && (
           <button
             onClick={onClear}
             className='flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors hover:bg-[#FFF4F4]'
             style={{ color: '#D82C0D' }}
           >
-            {/* Trash SVG */}
             <svg
               width='12'
               height='12'
@@ -142,7 +139,7 @@ export default function BillingCart({
 
                 {/* Qty controls */}
                 <div
-                  className='flex items-center rounded overflow-hidden flex-shrink-0'
+                  className='flex items-center rounded overflow-hidden shrink-0'
                   style={{ border: '1px solid #E1E3E5' }}
                 >
                   <button
@@ -194,7 +191,7 @@ export default function BillingCart({
 
                 {/* Total */}
                 <div
-                  className='text-xs font-semibold flex-shrink-0 min-w-[52px] text-right'
+                  className='text-xs font-semibold shrink-0 min-w-[52px] text-right'
                   style={{ color: '#202223' }}
                 >
                   {fmt(item.price * item.quantity)}
@@ -203,7 +200,7 @@ export default function BillingCart({
                 {/* Remove */}
                 <button
                   onClick={() => onRemove(item.id)}
-                  className='flex-shrink-0 p-1 rounded transition-colors hover:bg-[#FFF4F4]'
+                  className='shrink-0 p-1 rounded transition-colors hover:bg-[#FFF4F4]'
                   style={{ color: '#8C9196' }}
                   onMouseEnter={(e) =>
                     (e.currentTarget.style.color = '#D82C0D')
@@ -233,7 +230,7 @@ export default function BillingCart({
 
       {/* Footer */}
       <div
-        className='flex-shrink-0 px-4 py-3 space-y-3'
+        className='shrink-0 px-4 py-3 space-y-3'
         style={{ borderTop: '1px solid #E1E3E5' }}
       >
         {/* Discount */}
@@ -242,7 +239,6 @@ export default function BillingCart({
             className='flex-1 flex items-center gap-2 px-3 py-2 rounded-lg border'
             style={{ borderColor: '#E1E3E5' }}
           >
-            {/* Tag SVG */}
             <svg
               width='13'
               height='13'

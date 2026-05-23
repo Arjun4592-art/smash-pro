@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { POSCartItem, POSSession, Product, ProductVariant } from '@/types'
 import { GST_RATE } from '@/lib/constants'
 
+export type { POSCartItem, POSSession, Product, ProductVariant } from '@/types'
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface POSCustomer {
   id: string

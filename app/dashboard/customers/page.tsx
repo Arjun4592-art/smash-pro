@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 
@@ -220,6 +220,8 @@ const Icons = {
   ),
 }
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 interface Customer {
   id: string
   name: string
@@ -247,6 +249,8 @@ interface Segment {
   conditions: string[]
   isAuto: boolean
 }
+
+// ── Data ──────────────────────────────────────────────────────────────────────
 
 const CUSTOMERS: Customer[] = [
   {
@@ -518,7 +522,9 @@ const TAG_STYLES: Record<string, string> = {
   Boxing: 'bg-pink-100 text-pink-700',
 }
 
-function formatCurrency(n: number) {
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function formatCurrency(n: number): string {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
@@ -544,6 +550,8 @@ function getSegmentCustomers(segment: Segment): Customer[] {
   return []
 }
 
+// ── CustomerDrawer ────────────────────────────────────────────────────────────
+
 function CustomerDrawer({
   customer,
   onClose,
@@ -557,7 +565,7 @@ function CustomerDrawer({
         className='absolute inset-0 bg-black/30 backdrop-blur-sm'
         onClick={onClose}
       />
-      <div className='relative bg-white w-full max-w-100 h-full shadow-2xl overflow-y-auto flex flex-col'>
+      <div className='relative bg-white w-full max-w-[400px] h-full shadow-2xl overflow-y-auto flex flex-col'>
         <div className='flex items-center justify-between px-6 py-4 border-b border-[#E1E3E5] shrink-0'>
           <h2 className='font-sora text-[16px] font-semibold text-[#202223]'>
             Customer Details
@@ -654,7 +662,9 @@ function CustomerDrawer({
   )
 }
 
-export default function CustomersPage() {
+// ── Main content (uses useSearchParams — must be inside Suspense) ──────────────
+
+function CustomersPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const view = searchParams.get('view') ?? 'customers'
@@ -674,7 +684,7 @@ export default function CustomersPage() {
 
   const ALL_STATUSES = ['All', 'Active', 'Inactive', 'Blocked']
 
-  const setTab = (tab: string) => {
+  function setTab(tab: string) {
     if (tab === 'customers') router.push('/dashboard/customers')
     else router.push(`/dashboard/customers?view=${tab}`)
   }
@@ -704,7 +714,7 @@ export default function CustomersPage() {
   const totalRevenue = CUSTOMERS.reduce((s, c) => s + c.totalSpent, 0)
   const vipCustomers = CUSTOMERS.filter((c) => c.tags.includes('VIP')).length
 
-  const handleSaveSegment = async () => {
+  async function handleSaveSegment() {
     setSaving(true)
     await new Promise((r) => setTimeout(r, 800))
     setSaving(false)
@@ -821,8 +831,9 @@ export default function CustomersPage() {
         {/* ── All Customers ── */}
         {view === 'customers' && (
           <>
+            {/* Search / filters */}
             <div className='flex items-center gap-3 px-4 py-3 border-b border-[#E1E3E5] flex-wrap'>
-              <div className='flex items-center gap-2 flex-1 min-w-50 px-3 py-2 border border-[#E1E3E5] rounded-lg bg-[#F6F6F7] focus-within:border-[#008060] focus-within:bg-white transition-all'>
+              <div className='flex items-center gap-2 flex-1 min-w-[200px] px-3 py-2 border border-[#E1E3E5] rounded-lg bg-[#F6F6F7] focus-within:border-[#008060] focus-within:bg-white transition-all'>
                 {Icons.search}
                 <input
                   type='text'
@@ -871,7 +882,8 @@ export default function CustomersPage() {
               </div>
             </div>
 
-            <div className='flex items-center border-b border-[#E1E3E5] overflow-x-auto scrollbar-none px-4'>
+            {/* Status filter tabs */}
+            <div className='flex items-center border-b border-[#E1E3E5] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4'>
               {ALL_STATUSES.map((s) => (
                 <button
                   key={s}
@@ -892,8 +904,9 @@ export default function CustomersPage() {
               ))}
             </div>
 
+            {/* Bulk action bar */}
             {selectedIds.length > 0 && (
-              <div className='flex items-center gap-3 px-4 py-2.5 bg-[#008060]/8 border-b border-[#008060]/20'>
+              <div className='flex items-center gap-3 px-4 py-2.5 bg-[#008060]/[0.08] border-b border-[#008060]/20'>
                 <span className='text-[13px] font-medium text-[#008060]'>
                   {selectedIds.length} selected
                 </span>
@@ -916,6 +929,7 @@ export default function CustomersPage() {
               </div>
             )}
 
+            {/* Table / Grid */}
             {viewMode === 'table' ? (
               <div className='overflow-x-auto'>
                 <table className='w-full'>
@@ -932,30 +946,23 @@ export default function CustomersPage() {
                           className='w-4 h-4 rounded accent-[#008060] cursor-pointer'
                         />
                       </th>
-                      <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                        Customer
-                      </th>
-                      <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                        Location
-                      </th>
-                      <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                        Orders
-                      </th>
-                      <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                        Total Spent
-                      </th>
-                      <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                        Last Order
-                      </th>
-                      <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                        Tags
-                      </th>
-                      <th className='px-4 py-3 text-left text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                        Status
-                      </th>
-                      <th className='px-4 py-3 text-right text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide'>
-                        Actions
-                      </th>
+                      {[
+                        'Customer',
+                        'Location',
+                        'Orders',
+                        'Total Spent',
+                        'Last Order',
+                        'Tags',
+                        'Status',
+                        'Actions',
+                      ].map((h, i) => (
+                        <th
+                          key={h}
+                          className={`px-4 py-3 text-[12px] font-semibold text-[#6D7175] uppercase tracking-wide ${i === 7 ? 'text-right' : 'text-left'}`}
+                        >
+                          {h}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-[#F1F1F1]'>
@@ -1103,6 +1110,7 @@ export default function CustomersPage() {
               </div>
             )}
 
+            {/* Pagination */}
             <div className='flex items-center justify-between px-4 py-3 border-t border-[#E1E3E5]'>
               <p className='text-[12.5px] text-[#6D7175]'>
                 Showing{' '}
@@ -1123,7 +1131,7 @@ export default function CustomersPage() {
                 >
                   ← Prev
                 </button>
-                {[...Array(totalPages)].map((_, i) => (
+                {Array.from({ length: totalPages }).map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setPage(i + 1)}
@@ -1232,7 +1240,7 @@ export default function CustomersPage() {
               })}
             </div>
 
-            {/* Segment customers */}
+            {/* Segment customers preview */}
             {selectedSegment && (
               <div className='border border-[#E1E3E5] rounded-xl overflow-hidden'>
                 <div className='flex items-center justify-between px-5 py-4 bg-[#F6F6F7] border-b border-[#E1E3E5]'>
@@ -1308,7 +1316,7 @@ export default function CustomersPage() {
             className='absolute inset-0 bg-black/40 backdrop-blur-sm'
             onClick={() => setShowSegmentModal(false)}
           />
-          <div className='relative bg-white rounded-2xl shadow-2xl w-full max-w-130 overflow-hidden'>
+          <div className='relative bg-white rounded-2xl shadow-2xl w-full max-w-[520px] overflow-hidden'>
             <div className='flex items-center justify-between px-6 py-4 border-b border-[#E1E3E5]'>
               <h2 className='font-sora text-[16px] font-semibold text-[#202223]'>
                 Create Segment
@@ -1400,5 +1408,31 @@ export default function CustomersPage() {
         </div>
       )}
     </div>
+  )
+}
+
+// ── Fallback ──────────────────────────────────────────────────────────────────
+
+function CustomersPageFallback() {
+  return (
+    <div className='space-y-5 animate-pulse'>
+      <div className='h-8 w-48 bg-[#E1E3E5] rounded-lg' />
+      <div className='grid grid-cols-2 xl:grid-cols-4 gap-4'>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className='h-24 bg-[#E1E3E5] rounded-xl' />
+        ))}
+      </div>
+      <div className='h-[500px] bg-[#E1E3E5] rounded-xl' />
+    </div>
+  )
+}
+
+// ── Default export — Suspense wrapper ─────────────────────────────────────────
+
+export default function CustomersPage() {
+  return (
+    <Suspense fallback={<CustomersPageFallback />}>
+      <CustomersPageContent />
+    </Suspense>
   )
 }

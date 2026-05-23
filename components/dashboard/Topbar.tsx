@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSidebar } from '../../context/SidebarContext'
 
 const BREADCRUMB_MAP: Record<string, string> = {
   '/dashboard': 'Overview',
@@ -46,13 +47,12 @@ const NOTIFICATIONS = [
 
 export default function Topbar() {
   const pathname = usePathname()
+  const { openMobileSidebar } = useSidebar()
   const [showNotifications, setShowNotifications] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
 
-  const pageTitle = BREADCRUMB_MAP[pathname] ?? 'Dashboard'
   const unreadCount = NOTIFICATIONS.filter((n) => n.unread).length
 
-  // Build breadcrumbs
   const segments = pathname.split('/').filter(Boolean)
   const breadcrumbs = segments.map((seg, i) => {
     const href = '/' + segments.slice(0, i + 1).join('/')
@@ -63,26 +63,50 @@ export default function Topbar() {
   })
 
   return (
-    <header className='h-14 bg-white border-b border-[#E1E3E5] flex items-center justify-between px-6 shrink-0 relative z-20'>
-      {/* Left — breadcrumbs */}
-      <div className='flex items-center gap-1.5 text-[13px] min-w-0'>
-        {breadcrumbs.map((crumb, i) => (
-          <div key={crumb.href} className='flex items-center gap-1.5 min-w-0'>
-            {i > 0 && <span className='text-[#8C9196] text-[11px]'>/</span>}
-            {i === breadcrumbs.length - 1 ? (
-              <span className='font-semibold text-[#202223] truncate'>
-                {crumb.label}
-              </span>
-            ) : (
-              <Link
-                href={crumb.href}
-                className='text-[#6D7175] hover:text-[#202223] no-underline transition-colors truncate'
-              >
-                {crumb.label}
-              </Link>
-            )}
-          </div>
-        ))}
+    <header className='h-14 bg-white border-b border-[#E1E3E5] flex items-center justify-between px-4 shrink-0 relative z-20'>
+      {/* Left — hamburger (mobile) + breadcrumbs */}
+      <div className='flex items-center gap-3 min-w-0'>
+        {/* Hamburger — only visible below lg */}
+        <button
+          onClick={openMobileSidebar}
+          className='lg:hidden w-8 h-8 flex items-center justify-center text-[#6D7175] hover:text-[#202223] hover:bg-[#F6F6F7] rounded-lg bg-transparent border-none cursor-pointer shrink-0'
+          aria-label='Open menu'
+        >
+          <svg
+            width='18'
+            height='18'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='2'
+            strokeLinecap='round'
+          >
+            <line x1='3' y1='6' x2='21' y2='6' />
+            <line x1='3' y1='12' x2='21' y2='12' />
+            <line x1='3' y1='18' x2='21' y2='18' />
+          </svg>
+        </button>
+
+        {/* Breadcrumbs */}
+        <div className='flex items-center gap-1.5 text-[13px] min-w-0'>
+          {breadcrumbs.map((crumb, i) => (
+            <div key={crumb.href} className='flex items-center gap-1.5 min-w-0'>
+              {i > 0 && <span className='text-[#8C9196] text-[11px]'>/</span>}
+              {i === breadcrumbs.length - 1 ? (
+                <span className='font-semibold text-[#202223] truncate'>
+                  {crumb.label}
+                </span>
+              ) : (
+                <Link
+                  href={crumb.href}
+                  className='text-[#6D7175] hover:text-[#202223] no-underline transition-colors truncate'
+                >
+                  {crumb.label}
+                </Link>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Right — actions */}
@@ -135,7 +159,6 @@ export default function Topbar() {
             )}
           </button>
 
-          {/* Notifications dropdown */}
           {showNotifications && (
             <div className='absolute right-0 top-full mt-2 w-[320px] bg-white border border-[#E1E3E5] rounded-xl shadow-lg overflow-hidden z-50'>
               <div className='flex items-center justify-between px-4 py-3 border-b border-[#E1E3E5]'>
@@ -146,18 +169,14 @@ export default function Topbar() {
                   Mark all read
                 </button>
               </div>
-              <div className='divide-y divide-[#F1F1F1] max-h-75 overflow-y-auto'>
+              <div className='divide-y divide-[#F1F1F1] max-h-[300px] overflow-y-auto'>
                 {NOTIFICATIONS.map((n) => (
                   <div
                     key={n.id}
-                    className={`flex items-start gap-3 px-4 py-3 hover:bg-[#F6F6F7] transition-colors cursor-pointer ${
-                      n.unread ? 'bg-[#F2F7F5]/50' : ''
-                    }`}
+                    className={`flex items-start gap-3 px-4 py-3 hover:bg-[#F6F6F7] transition-colors cursor-pointer ${n.unread ? 'bg-[#F2F7F5]/50' : ''}`}
                   >
                     <span
-                      className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                        n.unread ? 'bg-[#008060]' : 'bg-transparent'
-                      }`}
+                      className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${n.unread ? 'bg-[#008060]' : 'bg-transparent'}`}
                     />
                     <div className='flex-1 min-w-0'>
                       <p className='text-[12.5px] text-[#202223] leading-snug'>
@@ -210,9 +229,8 @@ export default function Topbar() {
             </svg>
           </button>
 
-          {/* Profile dropdown */}
           {showProfile && (
-            <div className='absolute right-0 top-full mt-2 w-50 bg-white border border-[#E1E3E5] rounded-xl shadow-lg overflow-hidden z-50'>
+            <div className='absolute right-0 top-full mt-2 w-[200px] bg-white border border-[#E1E3E5] rounded-xl shadow-lg overflow-hidden z-50'>
               <div className='px-4 py-3 border-b border-[#E1E3E5]'>
                 <p className='text-[13px] font-semibold text-[#202223]'>
                   Admin User
@@ -240,10 +258,7 @@ export default function Topbar() {
               <div className='border-t border-[#E1E3E5] py-1'>
                 <button
                   className='w-full flex items-center px-4 py-2 text-[13px] text-[#D82C0D] hover:bg-[#F6F6F7] transition-colors bg-transparent border-none cursor-pointer text-left'
-                  onClick={() => {
-                    setShowProfile(false)
-                    // Add your logout logic here
-                  }}
+                  onClick={() => setShowProfile(false)}
                 >
                   Sign out
                 </button>
@@ -253,7 +268,7 @@ export default function Topbar() {
         </div>
       </div>
 
-      {/* Click outside to close */}
+      {/* Click outside to close dropdowns */}
       {(showNotifications || showProfile) && (
         <div
           className='fixed inset-0 z-40'

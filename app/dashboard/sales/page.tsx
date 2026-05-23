@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import {
   AreaChart,
@@ -18,6 +18,8 @@ import {
   Pie,
   Cell,
 } from 'recharts'
+
+// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const Icons = {
   revenue: (
@@ -276,6 +278,8 @@ const Icons = {
   ),
 }
 
+// ── Data ──────────────────────────────────────────────────────────────────────
+
 const DAILY_DATA = [
   { label: 'May 1', revenue: 12400, orders: 24, customers: 18 },
   { label: 'May 5', revenue: 18200, orders: 31, customers: 24 },
@@ -467,13 +471,33 @@ const LIVE_VISITORS = [
   },
 ]
 
-function formatCurrency(n: number) {
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type ChartMetric = 'revenue' | 'orders' | 'customers'
+type ChartType = 'area' | 'bar' | 'line'
+
+interface TooltipProps {
+  active?: boolean
+  payload?: Array<{ dataKey: string; color: string; value: number }>
+  label?: string
+}
+
+interface ScheduledReport {
+  name: string
+  freq: string
+  channel: string
+  active: boolean
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function formatCurrency(n: number): string {
   if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`
   if (n >= 1000) return `₹${(n / 1000).toFixed(0)}K`
   return `₹${n}`
 }
 
-function formatCurrencyFull(n: number) {
+function formatCurrencyFull(n: number): string {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
@@ -481,12 +505,14 @@ function formatCurrencyFull(n: number) {
   }).format(n)
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (!active || !payload?.length) return null
   return (
-    <div className='bg-white border border-[#E1E3E5] rounded-xl shadow-lg p-3 min-w-37.5'>
+    <div className='bg-white border border-[#E1E3E5] rounded-xl shadow-lg p-3 min-w-[150px]'>
       <p className='text-[11.5px] font-semibold text-[#6D7175] mb-2'>{label}</p>
-      {payload.map((entry: any) => (
+      {payload.map((entry) => (
         <div
           key={entry.dataKey}
           className='flex items-center justify-between gap-4'
@@ -548,23 +574,92 @@ function StatCard({
   )
 }
 
-export default function DashboardSalesPage() {
+// ── Scheduled Reports with local toggle state ─────────────────────────────────
+
+const INITIAL_SCHEDULES: ScheduledReport[] = [
+  {
+    name: 'Daily Sales Summary',
+    freq: 'Every day at 8:00 AM',
+    channel: 'Email',
+    active: true,
+  },
+  {
+    name: 'Weekly Performance Report',
+    freq: 'Every Monday at 9:00 AM',
+    channel: 'Email',
+    active: true,
+  },
+  {
+    name: 'Monthly Revenue Report',
+    freq: '1st of every month',
+    channel: 'Email + SMS',
+    active: false,
+  },
+]
+
+function ScheduledReports() {
+  const [schedules, setSchedules] =
+    useState<ScheduledReport[]>(INITIAL_SCHEDULES)
+
+  function toggle(index: number) {
+    setSchedules((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, active: !s.active } : s)),
+    )
+  }
+
+  return (
+    <div className='bg-white border border-[#E1E3E5] rounded-xl p-5'>
+      <h3 className='font-sora text-[14px] font-semibold text-[#202223] mb-4'>
+        Scheduled Reports
+      </h3>
+      <div className='space-y-3'>
+        {schedules.map((s, i) => (
+          <div
+            key={s.name}
+            className='flex items-center justify-between p-3 border border-[#E1E3E5] rounded-lg'
+          >
+            <div>
+              <p className='text-[13px] font-medium text-[#202223]'>{s.name}</p>
+              <p className='text-[11.5px] text-[#6D7175]'>
+                {s.freq} · {s.channel}
+              </p>
+            </div>
+            <button
+              onClick={() => toggle(i)}
+              aria-label={s.active ? 'Disable' : 'Enable'}
+              className={`relative w-10 h-6 rounded-full transition-colors border-none cursor-pointer ${s.active ? 'bg-[#008060]' : 'bg-[#8C9196]'}`}
+            >
+              <span
+                className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${s.active ? 'translate-x-4' : 'translate-x-0.5'}`}
+              />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Main page content (uses useSearchParams — must be inside Suspense) ─────────
+
+function SalesPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const view = searchParams.get('view') ?? 'overview'
 
   const [dateRange, setDateRange] = useState('last30')
-  const [chartType, setChartType] = useState<'area' | 'bar' | 'line'>('area')
-  const [chartMetric, setChartMetric] = useState<
-    'revenue' | 'orders' | 'customers'
-  >('revenue')
+  const [chartType, setChartType] = useState<ChartType>('area')
+  const [chartMetric, setChartMetric] = useState<ChartMetric>('revenue')
   const [liveCount, setLiveCount] = useState(7)
 
   useEffect(() => {
     if (view !== 'live') return
     const interval = setInterval(() => {
       setLiveCount((c) =>
-        Math.max(3, Math.min(20, c + Math.floor(Math.random() * 3) - 1)),
+        Math.max(
+          3,
+          Math.min(LIVE_VISITORS.length, c + Math.floor(Math.random() * 3) - 1),
+        ),
       )
     }, 3000)
     return () => clearInterval(interval)
@@ -578,7 +673,7 @@ export default function DashboardSalesPage() {
     { id: 'live', label: 'Live View', isLive: true },
   ]
 
-  const setTab = (id: string) => {
+  function setTab(id: string) {
     if (id === 'overview') router.push('/dashboard/sales')
     else router.push(`/dashboard/sales?view=${id}`)
   }
@@ -657,7 +752,8 @@ export default function DashboardSalesPage() {
 
       {/* Tabbed card */}
       <div className='bg-white border border-[#E1E3E5] rounded-xl overflow-hidden'>
-        <div className='flex items-center border-b border-[#E1E3E5] px-4 overflow-x-auto scrollbar-none'>
+        {/* Tab bar */}
+        <div className='flex items-center border-b border-[#E1E3E5] px-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -819,6 +915,7 @@ export default function DashboardSalesPage() {
             </ResponsiveContainer>
 
             <div className='grid grid-cols-1 lg:grid-cols-2 gap-5 pt-4 border-t border-[#E1E3E5]'>
+              {/* Orders by Sport */}
               <div>
                 <p className='font-sora text-[14px] font-semibold text-[#202223] mb-4'>
                   Orders by Sport
@@ -840,7 +937,10 @@ export default function DashboardSalesPage() {
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(v: number) => [v, 'Orders']}
+                        formatter={(value) => [
+                          (value as number).toLocaleString(),
+                          'Orders',
+                        ]}
                         contentStyle={{
                           fontSize: 12,
                           border: '1px solid #E1E3E5',
@@ -876,6 +976,8 @@ export default function DashboardSalesPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Period Summary */}
               <div>
                 <p className='font-sora text-[14px] font-semibold text-[#202223] mb-4'>
                   Period Summary
@@ -979,7 +1081,7 @@ export default function DashboardSalesPage() {
               </div>
             </div>
 
-            {/* Geography */}
+            {/* Sales by City */}
             <div className='pt-4 border-t border-[#E1E3E5]'>
               <div className='flex items-center gap-2 mb-4'>
                 <div className='text-[#6D7175]'>{Icons.map}</div>
@@ -1010,7 +1112,7 @@ export default function DashboardSalesPage() {
               </div>
             </div>
 
-            {/* Channels */}
+            {/* Revenue by Channel */}
             <div className='pt-4 border-t border-[#E1E3E5]'>
               <p className='font-sora text-[14px] font-semibold text-[#202223] mb-4'>
                 Revenue by Channel
@@ -1040,7 +1142,6 @@ export default function DashboardSalesPage() {
                   <Tooltip content={<CustomTooltip />} />
                   <Bar
                     dataKey='website'
-                    name='Website'
                     fill='#008060'
                     radius={[4, 4, 0, 0]}
                     maxBarSize={28}
@@ -1048,14 +1149,12 @@ export default function DashboardSalesPage() {
                   />
                   <Bar
                     dataKey='pos'
-                    name='POS'
                     fill='#2C6ECB'
                     maxBarSize={28}
                     stackId='a'
                   />
                   <Bar
                     dataKey='dashboard'
-                    name='Dashboard'
                     fill='#FFC453'
                     radius={[4, 4, 0, 0]}
                     maxBarSize={28}
@@ -1169,54 +1268,7 @@ export default function DashboardSalesPage() {
               </div>
             </div>
 
-            <div className='bg-white border border-[#E1E3E5] rounded-xl p-5'>
-              <h3 className='font-sora text-[14px] font-semibold text-[#202223] mb-4'>
-                Scheduled Reports
-              </h3>
-              <div className='space-y-3'>
-                {[
-                  {
-                    name: 'Daily Sales Summary',
-                    freq: 'Every day at 8:00 AM',
-                    channel: 'Email',
-                    active: true,
-                  },
-                  {
-                    name: 'Weekly Performance Report',
-                    freq: 'Every Monday at 9:00 AM',
-                    channel: 'Email',
-                    active: true,
-                  },
-                  {
-                    name: 'Monthly Revenue Report',
-                    freq: '1st of every month',
-                    channel: 'Email + SMS',
-                    active: false,
-                  },
-                ].map((s) => (
-                  <div
-                    key={s.name}
-                    className='flex items-center justify-between p-3 border border-[#E1E3E5] rounded-lg'
-                  >
-                    <div>
-                      <p className='text-[13px] font-medium text-[#202223]'>
-                        {s.name}
-                      </p>
-                      <p className='text-[11.5px] text-[#6D7175]'>
-                        {s.freq} · {s.channel}
-                      </p>
-                    </div>
-                    <button
-                      className={`relative w-10 h-6 rounded-full transition-colors border-none cursor-pointer ${s.active ? 'bg-[#008060]' : 'bg-[#8C9196]'}`}
-                    >
-                      <span
-                        className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${s.active ? 'translate-x-4' : 'translate-x-0.5'}`}
-                      />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ScheduledReports />
           </div>
         )}
 
@@ -1256,6 +1308,7 @@ export default function DashboardSalesPage() {
                   icon: Icons.cart,
                   color: 'text-[#916A00]',
                   bg: 'bg-[#FFC453]/20',
+                  pulse: false,
                 },
                 {
                   label: 'Checkouts',
@@ -1263,6 +1316,7 @@ export default function DashboardSalesPage() {
                   icon: Icons.orders,
                   color: 'text-[#008060]',
                   bg: 'bg-[#008060]/10',
+                  pulse: false,
                 },
                 {
                   label: "Today's Orders",
@@ -1270,6 +1324,7 @@ export default function DashboardSalesPage() {
                   icon: Icons.revenue,
                   color: 'text-[#2C6ECB]',
                   bg: 'bg-[#2C6ECB]/10',
+                  pulse: false,
                 },
               ].map((stat) => (
                 <div
@@ -1334,7 +1389,7 @@ export default function DashboardSalesPage() {
 
             <div className='bg-white border border-[#E1E3E5] rounded-xl p-5'>
               <p className='font-sora text-[14px] font-semibold text-[#202223] mb-4'>
-                Today's Activity Timeline
+                Today&apos;s Activity Timeline
               </p>
               <div className='space-y-3'>
                 {[
@@ -1388,5 +1443,31 @@ export default function DashboardSalesPage() {
         )}
       </div>
     </div>
+  )
+}
+
+// ── Fallback shown while Suspense resolves ────────────────────────────────────
+
+function SalesPageFallback() {
+  return (
+    <div className='space-y-5 animate-pulse'>
+      <div className='h-8 w-56 bg-[#E1E3E5] rounded-lg' />
+      <div className='grid grid-cols-2 xl:grid-cols-5 gap-4'>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className='h-28 bg-[#E1E3E5] rounded-xl' />
+        ))}
+      </div>
+      <div className='h-96 bg-[#E1E3E5] rounded-xl' />
+    </div>
+  )
+}
+
+// ── Default export — wraps content in Suspense ────────────────────────────────
+
+export default function DashboardSalesPage() {
+  return (
+    <Suspense fallback={<SalesPageFallback />}>
+      <SalesPageContent />
+    </Suspense>
   )
 }

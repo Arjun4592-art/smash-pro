@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSidebar } from '../../context/SidebarContext'
 
 interface NavChild {
   label: string
@@ -209,21 +210,6 @@ const Icons = {
       <line x1='21' y1='21' x2='16.65' y2='16.65' />
     </svg>
   ),
-  hamburger: (
-    <svg
-      width='18'
-      height='18'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-      strokeLinecap='round'
-    >
-      <line x1='3' y1='6' x2='21' y2='6' />
-      <line x1='3' y1='12' x2='21' y2='12' />
-      <line x1='3' y1='18' x2='21' y2='18' />
-    </svg>
-  ),
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -290,7 +276,8 @@ const NAV_ITEMS: NavItem[] = [
   },
 ]
 
-// ─── Nav content ──────────────────────────────────────────────────────────────
+// ── NavContent ────────────────────────────────────────────────────────────────
+
 function NavContent({
   collapsed,
   openMenus,
@@ -307,7 +294,7 @@ function NavContent({
   onLinkClick?: () => void
 }) {
   return (
-    <nav className='flex-1 px-2 py-2 overflow-y-auto space-y-0.5 scrollbar-none'>
+    <nav className='flex-1 px-2 py-2 overflow-y-auto space-y-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
       {NAV_ITEMS.map((item) => {
         const hasChildren = !!item.children?.length
         const isOpen = openMenus.includes(item.label)
@@ -317,15 +304,10 @@ function NavContent({
           <div key={item.label}>
             {hasChildren ? (
               <>
-                {/* ── Parent button ── */}
                 <button
                   onClick={() => toggleMenu(item.label)}
                   title={collapsed ? item.label : undefined}
-                  className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all text-[13px] font-medium border-none cursor-pointer ${
-                    groupActive
-                      ? 'bg-[#F2F7F5] text-[#008060]'
-                      : 'text-[#202223] hover:bg-[#F6F6F7] bg-transparent'
-                  } ${collapsed ? 'justify-center' : ''}`}
+                  className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all text-[13px] font-medium border-none cursor-pointer ${groupActive ? 'bg-[#F2F7F5] text-[#008060]' : 'text-[#202223] hover:bg-[#F6F6F7] bg-transparent'} ${collapsed ? 'justify-center' : ''}`}
                 >
                   <span
                     className={`shrink-0 ${groupActive ? 'text-[#008060]' : 'text-[#6D7175]'}`}
@@ -351,8 +333,6 @@ function NavContent({
                     </>
                   )}
                 </button>
-
-                {/* ── Children — always render, animate with max-height ── */}
                 {!collapsed && (
                   <div
                     className='overflow-hidden transition-all duration-200'
@@ -369,11 +349,7 @@ function NavContent({
                           key={child.href}
                           href={child.href}
                           onClick={onLinkClick}
-                          className={`flex items-center px-2.5 py-1.5 rounded-lg text-[12.5px] no-underline transition-all ${
-                            isActive(child.href)
-                              ? 'text-[#008060] font-semibold bg-[#F2F7F5]'
-                              : 'text-[#6D7175] hover:text-[#202223] hover:bg-[#F6F6F7]'
-                          }`}
+                          className={`flex items-center px-2.5 py-1.5 rounded-lg text-[12.5px] no-underline transition-all ${isActive(child.href) ? 'text-[#008060] font-semibold bg-[#F2F7F5]' : 'text-[#6D7175] hover:text-[#202223] hover:bg-[#F6F6F7]'}`}
                         >
                           {child.label}
                         </Link>
@@ -387,11 +363,7 @@ function NavContent({
                 href={item.href!}
                 onClick={onLinkClick}
                 title={collapsed ? item.label : undefined}
-                className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-all text-[13px] font-medium no-underline ${
-                  groupActive
-                    ? 'bg-[#F2F7F5] text-[#008060]'
-                    : 'text-[#202223] hover:bg-[#F6F6F7]'
-                } ${collapsed ? 'justify-center' : ''}`}
+                className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-all text-[13px] font-medium no-underline ${groupActive ? 'bg-[#F2F7F5] text-[#008060]' : 'text-[#202223] hover:bg-[#F6F6F7]'} ${collapsed ? 'justify-center' : ''}`}
               >
                 <span
                   className={`shrink-0 ${groupActive ? 'text-[#008060]' : 'text-[#6D7175]'}`}
@@ -410,7 +382,8 @@ function NavContent({
   )
 }
 
-// ─── Bottom user section ──────────────────────────────────────────────────────
+// ── UserSection ───────────────────────────────────────────────────────────────
+
 function UserSection({ collapsed }: { collapsed: boolean }) {
   return (
     <div className='px-2 py-2 border-t border-[#E1E3E5] shrink-0'>
@@ -458,16 +431,16 @@ function UserSection({ collapsed }: { collapsed: boolean }) {
   )
 }
 
-// ─── Main Sidebar ─────────────────────────────────────────────────────────────
+// ── Main Sidebar ──────────────────────────────────────────────────────────────
+
 export default function Sidebar() {
   const pathname = usePathname()
+  const { mobileOpen, closeMobileSidebar } = useSidebar()
 
-  // ── Shared state (both desktop + mobile use same state) ────────────────────
   const [openMenus, setOpenMenus] = useState<string[]>(['Orders', 'Products'])
   const [collapsed, setCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
 
-  // ── Auto-open active group on route change ─────────────────────────────────
+  // Auto-open active group on route change
   useEffect(() => {
     NAV_ITEMS.forEach((item) => {
       if (item.children) {
@@ -483,24 +456,15 @@ export default function Sidebar() {
     })
   }, [pathname])
 
-  // ── Close mobile sidebar on route change ───────────────────────────────────
+  // Close mobile sidebar on route change
   useEffect(() => {
-    setMobileOpen(false)
+    closeMobileSidebar()
   }, [pathname])
 
-  // ── Expose open function to Topbar ─────────────────────────────────────────
-  useEffect(() => {
-    ;(window as any).__openMobileSidebar = () => setMobileOpen(true)
-    return () => {
-      delete (window as any).__openMobileSidebar
-    }
-  }, [])
-
-  const toggleMenu = (label: string) => {
+  const toggleMenu = (label: string) =>
     setOpenMenus((prev) =>
       prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
     )
-  }
 
   const isActive = (href: string) =>
     href === '/dashboard'
@@ -513,7 +477,6 @@ export default function Sidebar() {
     return false
   }
 
-  // ── Logo section ───────────────────────────────────────────────────────────
   const logoSection = (
     <div className='flex items-center justify-between px-3 py-3 border-b border-[#E1E3E5] h-14 shrink-0'>
       {!collapsed ? (
@@ -577,9 +540,9 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* ── Desktop Sidebar ───────────────────────────────────────────────────── */}
+      {/* ── Desktop Sidebar ── */}
       <aside
-        className={`hidden lg:flex h-screen bg-white border-r border-[#E1E3E5] flex-col shrink-0 transition-all duration-300 relative ${collapsed ? 'w-15' : 'w-60'}`}
+        className={`hidden lg:flex h-screen bg-white border-r border-[#E1E3E5] flex-col shrink-0 transition-all duration-300 ${collapsed ? 'w-[60px]' : 'w-60'}`}
       >
         {logoSection}
         {searchSection}
@@ -593,26 +556,24 @@ export default function Sidebar() {
         <UserSection collapsed={collapsed} />
       </aside>
 
-      {/* ── Mobile overlay ────────────────────────────────────────────────────── */}
+      {/* ── Mobile overlay ── */}
       {mobileOpen && (
         <div
           className='fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden'
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobileSidebar}
         />
       )}
 
-      {/* ── Mobile Sidebar Drawer ─────────────────────────────────────────────── */}
+      {/* ── Mobile Sidebar Drawer ── */}
       <aside
-        className={`fixed top-0 left-0 h-full w-70 bg-white border-r border-[#E1E3E5] flex flex-col z-50 lg:hidden transition-transform duration-300 ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 h-full w-[280px] bg-white border-r border-[#E1E3E5] flex flex-col z-50 lg:hidden transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Mobile header */}
         <div className='flex items-center justify-between px-4 py-3 border-b border-[#E1E3E5] h-14 shrink-0'>
           <Link
             href='/dashboard'
             className='flex items-center gap-2.5 no-underline'
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobileSidebar}
           >
             <div className='w-8 h-8 bg-[#008060] rounded-lg flex items-center justify-center text-white text-[11px] font-bold'>
               AS
@@ -627,7 +588,7 @@ export default function Sidebar() {
             </div>
           </Link>
           <button
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobileSidebar}
             className='w-8 h-8 flex items-center justify-center text-[#6D7175] hover:text-[#202223] hover:bg-[#F6F6F7] rounded-lg bg-transparent border-none cursor-pointer'
           >
             {Icons.close}
@@ -646,16 +607,14 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* Mobile nav — same shared state as desktop */}
         <NavContent
           collapsed={false}
           openMenus={openMenus}
           toggleMenu={toggleMenu}
           isActive={isActive}
           isGroupActive={isGroupActive}
-          onLinkClick={() => setMobileOpen(false)}
+          onLinkClick={closeMobileSidebar}
         />
-
         <UserSection collapsed={false} />
       </aside>
     </>

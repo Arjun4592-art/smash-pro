@@ -287,8 +287,8 @@ export default function DashboardPage() {
                   fontSize: '12px',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                 }}
-                formatter={(value: number) => [
-                  formatCurrency(value),
+                formatter={(value) => [
+                  (value as number).toLocaleString(),
                   'Revenue',
                 ]}
               />
@@ -333,7 +333,10 @@ export default function DashboardPage() {
                   borderRadius: '8px',
                   fontSize: '12px',
                 }}
-                formatter={(value: number) => [value, 'Orders']}
+                formatter={(value) => [
+                  (value as number).toLocaleString(),
+                  'Orders',
+                ]}
               />
               <Bar
                 dataKey='orders'

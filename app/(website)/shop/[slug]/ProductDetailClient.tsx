@@ -37,6 +37,9 @@ export default function ProductDetailClient({ product, related }: Props) {
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
   const addItem = useCartStore((s) => s.addItem)
+  const [activeTab, setActiveTab] = useState<
+    'description' | 'specs' | 'shipping'
+  >('description')
 
   const discount = product.originalPrice
     ? calculateDiscount(product.price, product.originalPrice)
@@ -194,21 +197,108 @@ export default function ProductDetailClient({ product, related }: Props) {
               )}
             </div>
 
-            {/* Description */}
-            <p className='font-lato text-gray-600 leading-relaxed mb-6'>
-              {product.description}
-            </p>
+            {/* Tabs */}
+            <div className='mb-6'>
+              <div className='flex border-b border-gray-200 mb-4'>
+                {(['description', 'specs', 'shipping'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-4 py-2.5 text-sm font-semibold font-montserrat capitalize transition-all border-b-2 -mb-px ${
+                      activeTab === tab
+                        ? 'border-[#E8553A] text-[#E8553A]'
+                        : 'border-transparent text-gray-400 hover:text-[#0A1F44]'
+                    }`}
+                  >
+                    {tab === 'specs'
+                      ? 'Specifications'
+                      : tab === 'shipping'
+                        ? 'Shipping & Returns'
+                        : 'Description'}
+                  </button>
+                ))}
+              </div>
 
-            {/* Tags */}
-            <div className='flex flex-wrap gap-2 mb-6'>
-              {product.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className='px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded-full font-lato'
-                >
-                  #{tag}
-                </span>
-              ))}
+              {activeTab === 'description' && (
+                <div>
+                  <p className='font-lato text-gray-600 leading-relaxed mb-4'>
+                    {product.description}
+                  </p>
+                  <div className='flex flex-wrap gap-2'>
+                    {product.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className='px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded-full font-lato'
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'specs' && (
+                <div>
+                  {product.specs && product.specs.length > 0 ? (
+                    <div className='rounded-xl overflow-hidden border border-gray-100'>
+                      {product.specs.map((spec, i) => (
+                        <div
+                          key={spec.label}
+                          className={`flex items-center px-4 py-3 ${
+                            i % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                          }`}
+                        >
+                          <span className='w-1/2 text-sm font-semibold text-[#0A1F44] font-lato'>
+                            {spec.label}
+                          </span>
+                          <span className='w-1/2 text-sm text-gray-600 font-lato'>
+                            {spec.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className='text-sm text-gray-400 font-lato'>
+                      No specifications available.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'shipping' && (
+                <div className='space-y-4'>
+                  {[
+                    {
+                      title: 'Free Delivery',
+                      desc: 'Free shipping on all orders above ₹999. Standard delivery in 3–5 business days.',
+                    },
+                    {
+                      title: '7-Day Returns',
+                      desc: 'Not satisfied? Return within 7 days of delivery for a full refund. Items must be unused and in original packaging.',
+                    },
+                    {
+                      title: '100% Authentic',
+                      desc: 'All products are sourced directly from official brand distributors. Authenticity guaranteed.',
+                    },
+                    {
+                      title: 'Cash on Delivery',
+                      desc: 'COD available on orders up to ₹10,000 across 20,000+ pin codes in India.',
+                    },
+                  ].map((item) => (
+                    <div key={item.title} className='flex gap-3'>
+                      <div className='w-1.5 h-1.5 rounded-full bg-[#E8553A] mt-2 shrink-0' />
+                      <div>
+                        <p className='text-sm font-semibold text-[#0A1F44] font-montserrat mb-0.5'>
+                          {item.title}
+                        </p>
+                        <p className='text-sm text-gray-500 font-lato'>
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Stock */}

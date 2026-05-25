@@ -27,6 +27,11 @@ export interface ProductVariant {
   price: number
 }
 
+export interface ProductSpec {
+  label: string
+  value: string
+}
+
 export interface Product {
   id: string
   name: string
@@ -46,6 +51,7 @@ export interface Product {
   badge?: 'NEW' | 'SALE' | 'BESTSELLER' | 'LIMITED'
   inStock: boolean
   tags: string[]
+  specs: ProductSpec[]
   seo?: {
     title?: string
     description?: string

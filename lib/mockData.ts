@@ -9,7 +9,6 @@ import type {
 
 // ─── Products ───────────────────────────────────────────────────
 export const products: Product[] = [
-  // ── Football ──
   {
     id: 'p1',
     name: 'Nike Mercurial Superfly 9',
@@ -34,6 +33,15 @@ export const products: Product[] = [
     tags: ['boots', 'speed', 'elite', 'football'],
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Upper Material', value: 'Nike Aerotrak ACC Synthetic' },
+      { label: 'Sole', value: 'Carbon Fibre Soleplate' },
+      { label: 'Fit', value: 'Dynamic Fit Collar' },
+      { label: 'Stud Type', value: 'Firm Ground (FG)' },
+      { label: 'Weight', value: '180g (UK 8.5)' },
+      { label: 'Closure', value: 'Lace-up' },
+      { label: 'Surface', value: 'Firm Ground' },
+    ],
   },
   {
     id: 'p2',
@@ -57,6 +65,15 @@ export const products: Product[] = [
     tags: ['boots', 'control', 'premium', 'football'],
     createdAt: '2024-02-10T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Upper Material', value: 'Controlskin with Rubber Elements' },
+      { label: 'Sole', value: 'Carbon Fibre Soleplate' },
+      { label: 'Fit', value: 'Snug Laceless' },
+      { label: 'Stud Type', value: 'Firm Ground (FG)' },
+      { label: 'Weight', value: '195g (UK 8.5)' },
+      { label: 'Closure', value: 'Laceless' },
+      { label: 'Surface', value: 'Firm Ground' },
+    ],
   },
   {
     id: 'p3',
@@ -81,6 +98,15 @@ export const products: Product[] = [
     tags: ['ball', 'match', 'football'],
     createdAt: '2024-01-20T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Size', value: 'Size 5 (Match Standard)' },
+      { label: 'Construction', value: 'Thermally Bonded Seamless' },
+      { label: 'Panels', value: '20 Panel Design' },
+      { label: 'Bladder', value: 'Butyl Bladder' },
+      { label: 'Certification', value: 'FIFA Basic Approved' },
+      { label: 'Material', value: 'Polyurethane Shell' },
+      { label: 'Circumference', value: '68–70 cm' },
+    ],
   },
 
   // ── Cricket ──
@@ -107,6 +133,15 @@ export const products: Product[] = [
     tags: ['bat', 'english willow', 'premium', 'cricket'],
     createdAt: '2024-03-01T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Willow Grade', value: 'Grade 1 English Willow' },
+      { label: 'Handle', value: 'Oval Cane Handle with Rubber Grip' },
+      { label: 'Edge Thickness', value: '42mm' },
+      { label: 'Spine Height', value: '68mm' },
+      { label: 'Weight', value: '1.15–1.19 kg' },
+      { label: 'Blade Profile', value: 'Full Profile' },
+      { label: 'Recommended For', value: 'Professional / International' },
+    ],
   },
   {
     id: 'p5',
@@ -130,6 +165,15 @@ export const products: Product[] = [
     tags: ['gloves', 'batting', 'protection', 'cricket'],
     createdAt: '2024-04-01T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Palm Material', value: 'Multi-colour Pittards Leather' },
+      { label: 'Padding', value: 'High-Density Foam with PU Inserts' },
+      { label: 'Fingers', value: 'Individually Rolled' },
+      { label: 'Cuff', value: 'Extended Velcro Cuff' },
+      { label: 'Sizes Available', value: 'Small, Medium, Large, XL' },
+      { label: 'Hand', value: 'Right Hand Batsman' },
+      { label: 'Standard', value: 'BCCI Approved' },
+    ],
   },
   {
     id: 'p6',
@@ -154,6 +198,15 @@ export const products: Product[] = [
     tags: ['ball', 'leather', 'match', 'cricket'],
     createdAt: '2024-01-10T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Leather', value: 'Alum Tanned 4-piece Leather' },
+      { label: 'Seam', value: 'Prominent 6-row Stitched Seam' },
+      { label: 'Core', value: 'Multi-layer Cork Core' },
+      { label: 'Weight', value: '155.9–163g (5.5–5.75 oz)' },
+      { label: 'Circumference', value: '22.4–22.9 cm' },
+      { label: 'Certification', value: 'ICC Approved' },
+      { label: 'Usage', value: 'Match Play' },
+    ],
   },
 
   // ── Basketball ──
@@ -180,6 +233,15 @@ export const products: Product[] = [
     tags: ['shoes', 'basketball', 'lebron', 'nike'],
     createdAt: '2024-02-15T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Upper', value: 'Engineered Mesh with Fuse Overlays' },
+      { label: 'Midsole', value: 'Cushlon 3.0 Foam + Air Max Unit' },
+      { label: 'Outsole', value: 'Multi-directional Rubber' },
+      { label: 'Ankle', value: 'Mid-top with Internal Heel Counter' },
+      { label: 'Weight', value: '397g (US 10)' },
+      { label: 'Closure', value: 'Lace-up' },
+      { label: 'Surface', value: 'Indoor / Hardwood Court' },
+    ],
   },
   {
     id: 'p8',
@@ -203,6 +265,15 @@ export const products: Product[] = [
     tags: ['ball', 'nba', 'official', 'basketball'],
     createdAt: '2024-03-10T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Material', value: 'Full-grain Horween Leather' },
+      { label: 'Size', value: 'Size 7 (Official NBA)' },
+      { label: 'Circumference', value: '29.5 inches' },
+      { label: 'Weight', value: '623g (22 oz)' },
+      { label: 'Channels', value: '8 Standard Channels' },
+      { label: 'Bladder', value: 'Butyl Rubber' },
+      { label: 'Certification', value: 'Official NBA Game Ball' },
+    ],
   },
 
   // ── Tennis ──
@@ -229,6 +300,15 @@ export const products: Product[] = [
     tags: ['racket', 'federer', 'control', 'tennis'],
     createdAt: '2024-01-25T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Head Size', value: '97 sq in (626 cm²)' },
+      { label: 'Length', value: '27 inches (68.6 cm)' },
+      { label: 'Strung Weight', value: '340g (12 oz)' },
+      { label: 'Balance', value: '31.1 cm (8 pts HL)' },
+      { label: 'String Pattern', value: '16 × 19' },
+      { label: 'Stiffness (RA)', value: '66' },
+      { label: 'Construction', value: 'Braided Graphite / Kevlar' },
+    ],
   },
   {
     id: 'p10',
@@ -252,6 +332,15 @@ export const products: Product[] = [
     tags: ['racket', 'nadal', 'spin', 'tennis'],
     createdAt: '2024-02-20T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Head Size', value: '100 sq in (645 cm²)' },
+      { label: 'Length', value: '27 inches (68.6 cm)' },
+      { label: 'Strung Weight', value: '300g (10.6 oz)' },
+      { label: 'Balance', value: '32.4 cm (3 pts HL)' },
+      { label: 'String Pattern', value: '16 × 19' },
+      { label: 'Stiffness (RA)', value: '71' },
+      { label: 'Construction', value: 'FSI Spin Carbon + Cortex Pure Feel' },
+    ],
   },
 
   // ── Running ──
@@ -278,6 +367,15 @@ export const products: Product[] = [
     tags: ['shoes', 'running', 'zoom', 'nike'],
     createdAt: '2024-01-05T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Upper', value: 'Engineered Mesh' },
+      { label: 'Midsole', value: 'React Foam + Air Zoom Unit' },
+      { label: 'Outsole', value: 'Waffle Pattern Rubber' },
+      { label: 'Drop', value: '10mm' },
+      { label: 'Weight', value: "284g (Men's US 10)" },
+      { label: 'Closure', value: 'Lace-up' },
+      { label: 'Best For', value: 'Daily Training / Road Running' },
+    ],
   },
   {
     id: 'p12',
@@ -302,6 +400,15 @@ export const products: Product[] = [
     tags: ['watch', 'gps', 'solar', 'running'],
     createdAt: '2024-04-10T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Display', value: '1.3" MIP Sunlight-readable' },
+      { label: 'Battery Life', value: 'Up to 20 days (Solar: 42 days)' },
+      { label: 'GPS Modes', value: 'GPS, GLONASS, Galileo, MultiGNSS' },
+      { label: 'Water Rating', value: '5 ATM' },
+      { label: 'Weight', value: '53g' },
+      { label: 'Connectivity', value: 'Bluetooth, ANT+, Wi-Fi' },
+      { label: 'Health Sensors', value: 'HRV, SpO2, Skin Temp, HRM' },
+    ],
   },
 
   // ── Swimming ──
@@ -327,6 +434,15 @@ export const products: Product[] = [
     tags: ['goggles', 'competition', 'swimming'],
     createdAt: '2024-03-15T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Lens Type', value: 'Panoramic Curved Lens' },
+      { label: 'UV Protection', value: 'UV 400' },
+      { label: 'Anti-Fog', value: 'Yes' },
+      { label: 'Gasket', value: 'Low-profile Hydrodynamic Seal' },
+      { label: 'Strap', value: 'Dual Silicone Strap' },
+      { label: 'Nose Bridge', value: 'Adjustable' },
+      { label: 'Best For', value: 'Competition / Elite Training' },
+    ],
   },
 
   // ── Boxing ──
@@ -353,6 +469,15 @@ export const products: Product[] = [
     tags: ['gloves', 'training', 'boxing'],
     createdAt: '2024-02-05T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Material', value: 'Premium Synthetic Leather' },
+      { label: 'Lining', value: 'Evercool Moisture Management' },
+      { label: 'Closure', value: 'Hook & Loop Velcro Wrist Strap' },
+      { label: 'Padding', value: 'Multi-layer Foam' },
+      { label: 'Weight Options', value: '8oz, 10oz, 12oz, 14oz, 16oz' },
+      { label: 'Best For', value: 'Bag Work, Pad Work, Sparring' },
+      { label: 'Thumb', value: 'Attached Thumb Safety' },
+    ],
   },
 
   // ── Cycling ──
@@ -379,6 +504,15 @@ export const products: Product[] = [
     tags: ['bike', 'road', 'endurance', 'cycling'],
     createdAt: '2024-03-20T10:00:00Z',
     updatedAt: '2024-06-01T10:00:00Z',
+    specs: [
+      { label: 'Frame', value: 'Alpha Aluminum with IsoSpeed Decoupler' },
+      { label: 'Fork', value: 'Full Carbon' },
+      { label: 'Groupset', value: 'Shimano Claris R2000' },
+      { label: 'Gears', value: '16 Speed (2×8)' },
+      { label: 'Brakes', value: 'Rim Brakes' },
+      { label: 'Wheel Size', value: '700c' },
+      { label: 'Sizes Available', value: '47, 50, 52, 54, 56, 58, 60, 62 cm' },
+    ],
   },
 ]
 
